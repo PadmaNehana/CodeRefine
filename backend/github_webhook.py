@@ -1,28 +1,31 @@
 from ai_review import generate_ai_review
+from database import save_review
 
 
 def handle_github_webhook(payload: dict):
     """
-    Handles GitHub PR webhook and returns AI review.
+    Handle GitHub Pull Request webhook and store AI review
     """
 
-    # Check event type
-    action = payload.get("action")
-    pr = payload.get("pull_request")
+    # Only process pull request events
+    if "pull_request" not in payload:
+        return {"message": "Not a pull request event"}
 
-    if not pr or action not in ["opened", "synchronize"]:
-        return {"message": "Ignored event"}
+    pr = payload["pull_request"]
 
-    # Get PR title + body as sample code (simple hackathon version)
-    code_text = f"""
+    repo_name = payload["repository"]["full_name"]
+    pr_number = pr["number"]
+
+    # Use PR title + body as context for AI review
+    code_content = f"""
 PR Title: {pr.get('title')}
 PR Description: {pr.get('body')}
 """
 
     # Generate AI review
-    review = generate_ai_review(code_text)
+    review = generate_ai_review(code_content)
 
-    return {
-        "pr_title": pr.get("title"),
-        "review": review,
-    }
+    # ✅ Save correctly with repo + PR number
+    save_review(repo_name, pr_number, review)
+
+    return review

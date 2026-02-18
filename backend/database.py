@@ -32,3 +32,18 @@ def save_review(repo: str, pr_number: int, review: dict):
 
     conn.commit()
     conn.close()
+def get_latest_review():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT review FROM reviews ORDER BY id DESC LIMIT 1"
+    )
+    row = cursor.fetchone()
+
+    conn.close()
+
+    if row:
+        return json.loads(row[0])
+
+    return {"message": "No PR reviewed yet"}
