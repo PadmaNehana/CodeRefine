@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getHome } from "./api";
 
 function App() {
   const [review, setReview] = useState(null);
@@ -7,7 +8,7 @@ function App() {
   useEffect(() => {
     console.log("Calling backend...");
 
-    fetch("/latest-review")
+    fetch("http://127.0.0.1:8000/latest-review")
 
       .then((res) => {
         if (!res.ok) throw new Error("Status " + res.status);
